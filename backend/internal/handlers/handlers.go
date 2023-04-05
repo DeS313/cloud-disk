@@ -13,11 +13,13 @@ type MyHandler struct {
 
 const (
 	REGISTRATION = "/registration"
+	LOGIN        = "/login"
 )
 
 func (h *MyHandler) Register() *http.ServeMux {
 	h.handler.HandleFunc(REGISTRATION, h.registration)
 
+	h.handler.HandleFunc(LOGIN, h.login)
 	return h.handler
 }
 

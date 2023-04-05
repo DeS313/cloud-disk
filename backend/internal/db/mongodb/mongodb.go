@@ -16,7 +16,7 @@ type configDB struct {
 
 func NewClient(ctx context.Context, config configDB) (*mongo.Database, error) {
 
-	mongoDBURL := fmt.Sprintf("mongdb://%s:%s", config.HOST, config.PORT)
+	mongoDBURL := fmt.Sprintf("mongodb://%s:%s", config.HOST, config.PORT)
 
 	clientOptions := options.Client().ApplyURI(mongoDBURL)
 

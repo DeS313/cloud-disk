@@ -10,6 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func (s *Storage) FindOne(ctx context.Context, id string) (models.User, error) {
@@ -35,14 +36,37 @@ func (s *Storage) FindOne(ctx context.Context, id string) (models.User, error) {
 
 }
 
-func (s *Storage) Create(ctx context.Context, user models.User) (primitive.ObjectID, error) {
-	log.Println("созданиие пользователя")
-	_, err := s.db.InsertOne(ctx, user)
+func (s *Storage) FindOneByEmail(ctx context.Context, email string) (models.User, error) {
+	var user models.User
 
-	if err != nil {
-		return user.ID, fmt.Errorf("ошибка создания пользователя: %v", err)
+	result := s.db.FindOne(ctx, bson.M{"email": email})
+
+	if err := result.Decode(&user); err != nil {
+		return models.User{}, err
 	}
 
-	return user.ID, nil
+	return user, nil
 
+}
+
+func (s *Storage) Create(ctx context.Context, user models.User) (string, error) {
+	log.Println("созданиие пользователя")
+	result, err := s.db.InsertOne(ctx, user)
+
+	if err != nil {
+		log.Println(fmt.Errorf("ошибка создания пользователя: %v", err))
+		return user.ID.Hex(), err
+	}
+
+	s.db.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys:    bson.D{{Key: "email", Value: 1}},
+		Options: options.Index().SetUnique(true),
+	})
+
+	oid, ok := result.InsertedID.(primitive.ObjectID)
+	if !ok {
+		return "", fmt.Errorf("failed to convert ObjectID")
+	}
+
+	return oid.Hex(), nil
 }

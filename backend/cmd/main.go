@@ -24,15 +24,17 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	storage := storage.NewStorage(db, "cloud-disk")
+	storage := storage.NewStorage(db, "users")
 
 	service := service.NewService(storage)
 
 	var bindIP = fmt.Sprintf("%v:%v", config.HOST, config.PORT)
 	handler := handlers.NewMyHandler(service)
+	c := handlers.CorsSetting()
+
 	log.Printf("start web-server on %v", bindIP)
 
-	err = http.ListenAndServe(bindIP, handler.Register())
+	err = http.ListenAndServe(bindIP, c.Handler(handler.Register()))
 	log.Fatal(err)
 
 }

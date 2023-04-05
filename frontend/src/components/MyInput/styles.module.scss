@@ -1,0 +1,24 @@
+@import '../../sass/variables';
+
+.input {
+    border: none;
+    border-bottom: 3px solid $font-color;
+    background: transparent;
+    width: 100%;
+    padding: 3px;
+    transition: all .2s;
+
+    &:focus,
+    &:hover {
+        outline: none;
+        transform: scale(1.03);
+    }
+
+
+
+    &::placeholder {
+        color: $font-color;
+        font-weight: 700;
+    }
+
+}
