@@ -10,8 +10,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+const users = "users"
 
 func (s *Storage) FindOne(ctx context.Context, id string) (models.User, error) {
 	var user models.User
@@ -20,7 +21,7 @@ func (s *Storage) FindOne(ctx context.Context, id string) (models.User, error) {
 		return models.User{}, fmt.Errorf("ошибка преобразования hex в ObjectID, hex: %s", id)
 	}
 
-	result := s.db.FindOne(ctx, bson.M{"_id": oid})
+	result := s.db.Collection(users).FindOne(ctx, bson.M{"_id": oid})
 	if result.Err() != nil {
 		if errors.Is(result.Err(), mongo.ErrNoDocuments) {
 			return models.User{}, fmt.Errorf("user not found")
@@ -38,8 +39,7 @@ func (s *Storage) FindOne(ctx context.Context, id string) (models.User, error) {
 
 func (s *Storage) FindOneByEmail(ctx context.Context, email string) (models.User, error) {
 	var user models.User
-
-	result := s.db.FindOne(ctx, bson.M{"email": email})
+	result := s.db.Collection(users).FindOne(ctx, bson.M{"email": email})
 
 	if err := result.Decode(&user); err != nil {
 		return models.User{}, err
@@ -51,17 +51,12 @@ func (s *Storage) FindOneByEmail(ctx context.Context, email string) (models.User
 
 func (s *Storage) Create(ctx context.Context, user models.User) (string, error) {
 	log.Println("созданиие пользователя")
-	result, err := s.db.InsertOne(ctx, user)
+	result, err := s.db.Collection(users).InsertOne(ctx, user)
 
 	if err != nil {
 		log.Println(fmt.Errorf("ошибка создания пользователя: %v", err))
 		return user.ID.Hex(), err
 	}
-
-	s.db.Indexes().CreateOne(ctx, mongo.IndexModel{
-		Keys:    bson.D{{Key: "email", Value: 1}},
-		Options: options.Index().SetUnique(true),
-	})
 
 	oid, ok := result.InsertedID.(primitive.ObjectID)
 	if !ok {

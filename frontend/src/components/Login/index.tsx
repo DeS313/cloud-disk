@@ -1,17 +1,20 @@
-import React, { ChangeEvent, FormEvent } from 'react'
+import React, { ChangeEvent } from 'react'
 
 import s from './styles.module.scss'
+
 import MyInput from '../MyInput'
-import { IRegState } from './types'
-import AuthService from '../../API/authService'
-import { fetchRegistration } from '../../store/slices/user/userSlice'
+
+import { fetchLogin } from '../../store/slices/user/userSlice'
 import { useAppDispatch } from '../../store'
 
-const Registration: React.FC = () => {
-    const [regValue, setRegValue] = React.useState<IRegState>({
+
+
+const Login: React.FC = () => {
+    const [regValue, setRegValue] = React.useState({
         email: '',
         password: ''
     })
+
     const dispatch = useAppDispatch()
 
     const onChangeEmail = (e: ChangeEvent<HTMLInputElement>) => {
@@ -22,14 +25,19 @@ const Registration: React.FC = () => {
         setRegValue({ ...regValue, "password": e.currentTarget.value })
     }
 
-    const registration = () => {
-        dispatch(fetchRegistration(regValue))
-        setRegValue({ email: "", password: "" })
+    const login = async () => {
+        try {
+            dispatch(fetchLogin(regValue))
+            setRegValue({ email: "", password: "" })
+        } catch (err) {
+            alert(err)
+        }
     }
 
+
     return (
-        <div className={s.registration}>
-            <div className={s.header}>Регистрация</div>
+        <div className={s.login}>
+            <div className={s.header}>Авторизация</div>
             <MyInput
                 type='text'
                 onChange={onChangeEmail}
@@ -41,14 +49,9 @@ const Registration: React.FC = () => {
                 value={regValue.password}
                 placeholder='Введите пароль...' />
 
-            <button
-                onClick={registration}
-                className={s.btn}
-            >
-                Зарегистрироваться
-            </button>
+            <button onClick={() => login()} className={s.btn}>Войти</button>
         </div>
     )
 }
 
-export default Registration
+export default Login

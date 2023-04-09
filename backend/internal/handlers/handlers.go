@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/DeS313/cloud-disk/internal/middleware"
 	"github.com/DeS313/cloud-disk/internal/service"
 )
 
@@ -14,12 +15,15 @@ type MyHandler struct {
 const (
 	REGISTRATION = "/registration"
 	LOGIN        = "/login"
+	USER         = "/user"
+	FILES        = "/files"
 )
 
 func (h *MyHandler) Register() *http.ServeMux {
 	h.handler.HandleFunc(REGISTRATION, h.registration)
-
 	h.handler.HandleFunc(LOGIN, h.login)
+	h.handler.HandleFunc(USER, h.getUser)
+	h.handler.HandleFunc(FILES, middleware.AuthMiddleware(h.FileHandleFunc))
 	return h.handler
 }
 

@@ -21,6 +21,7 @@ func CorsSetting() *cors.Cors {
 		},
 		AllowCredentials: true,
 		AllowedHeaders: []string{
+			"Authorization",
 			"Content-Type",
 		},
 		OptionsPassthrough: true,

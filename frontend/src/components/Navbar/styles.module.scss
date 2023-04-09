@@ -14,9 +14,11 @@
     font-weight: 700;
 }
 
-.login {
+.login,
+.logout {
     margin-left: auto;
     margin-right: 20px;
+    cursor: pointer;
 }
 
 .container {

@@ -14,6 +14,7 @@ type Config struct {
 		PORT     string `json:"port"`
 		DATABASE string `json:"database"`
 	}
+	FilePath string `json:"filePath"`
 }
 
 func openConfigFile(path string) (*os.File, error) {
