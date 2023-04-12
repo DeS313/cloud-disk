@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/DeS313/cloud-disk/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -14,9 +15,9 @@ import (
 
 const cloudDisk = "cloud-disk"
 
-func (s *Storage) CreateF(ctx context.Context, file models.Files) (string, error) {
+func (s *Storage) CreateF(ctx context.Context, file *models.Files) (string, error) {
 	log.Println("созданиие файла")
-
+	file.Date = primitive.NewDateTimeFromTime(time.Now())
 	result, err := s.db.Collection(cloudDisk).InsertOne(ctx, file)
 
 	if err != nil {
@@ -55,13 +56,29 @@ func (s *Storage) FindOneF(ctx context.Context, id string) (models.Files, error)
 	return file, nil
 }
 
-func (s *Storage) FindFiles(ctx context.Context, file *models.Files) ([]models.Files, error) {
-	// TODO неработает
+func (s *Storage) FindFiles(ctx context.Context, userID, parentID string) ([]models.Files, error) {
 	var files []models.Files
-	result, err := s.db.Collection(cloudDisk).Find(ctx, bson.M{
-		"userID":    file.UserID,
-		"parrentID": file.ParrentID,
-	})
+	var poid primitive.ObjectID
+	fmt.Println(parentID, "parrentID findFIles")
+
+	uoid, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return files, err
+	}
+
+	filter := bson.M{
+		"userID":    uoid,
+		"parrentID": uoid,
+	}
+	if len(parentID) > 0 {
+		poid, err = primitive.ObjectIDFromHex(parentID)
+		if err != nil {
+			return files, err
+		}
+		filter["parrentID"] = poid
+	}
+
+	result, err := s.db.Collection(cloudDisk).Find(ctx, filter)
 	if err != nil {
 		log.Println(err)
 		return files, err
@@ -70,5 +87,6 @@ func (s *Storage) FindFiles(ctx context.Context, file *models.Files) ([]models.F
 		log.Println(err)
 		return files, err
 	}
+	fmt.Println(files)
 	return files, err
 }

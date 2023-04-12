@@ -5,10 +5,8 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/DeS313/cloud-disk/internal/models"
-	"github.com/DeS313/cloud-disk/internal/service"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -43,18 +41,17 @@ func (h *MyHandler) registration(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		oid, _ := primitive.ObjectIDFromHex(user)
-		file, err := h.service.CreateFile(r.Context(), &models.Files{
+		if err := h.service.CreateDir(&models.Files{
 			UserID: oid,
 			Name:   "",
-		})
-		if err != nil {
+		}); err != nil {
 			w.Write([]byte(err.Error()))
 			return
 		}
 
 		res, _ := json.Marshal(map[string]interface{}{
 			"user_id": user,
-			"file_id": file,
+			"file_id": "success",
 		})
 		w.Write([]byte(res))
 		return
@@ -97,7 +94,8 @@ func (h *MyHandler) login(w http.ResponseWriter, r *http.Request) {
 
 	token, err := h.service.GenerateToken(u.ID.Hex())
 	if err != nil {
-		log.Println(err)
+		log.Println(err, "generate token")
+		return
 	}
 
 	resJson, _ := json.Marshal(map[string]interface{}{
@@ -123,16 +121,7 @@ func (h *MyHandler) getUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token := strings.Split(r.Header.Get("Authorization"), " ")[1]
-
-	id, err := service.ParseToken(token)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	log.Println(id)
-
-	user, err := h.service.FindOne(r.Context(), id)
+	user, err := h.service.FindOne(r.Context(), r.Header.Get("id"))
 	if err != nil {
 		log.Println(err)
 		return
@@ -144,4 +133,5 @@ func (h *MyHandler) getUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write(res)
+	return
 }

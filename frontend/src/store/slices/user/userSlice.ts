@@ -2,6 +2,7 @@ import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
 import { IUserState, IFetchUserArgs } from './types';
 import AuthService from '../../../API/authService';
+import { useAppDispatch } from '../..';
 
 const initialState: IUserState = {
   currentUser: {
@@ -32,24 +33,16 @@ export const fetchRegistration = createAsyncThunk(
 export const fetchLogin = createAsyncThunk(
   'users/fetchLogin',
   async (params: IFetchUserArgs, thunkApi) => {
-    try {
-      const { email, password } = params;
-      const data = await AuthService.login(email, password);
-      return data;
-    } catch (e) {
-      alert(e);
-    }
+    const { email, password } = params;
+    const user = await AuthService.login(email, password);
+    return user;
   },
 );
 
 export const fetchGetUser = createAsyncThunk('users/fetchGetUser', async (thunkApi) => {
-  try {
-    const user = await AuthService.getUser().catch();
-    return user;
-  } catch (e) {
-    alert('ERR');
-    throw e;
-  }
+  const user = await AuthService.getUser();
+
+  return user;
 });
 
 const userSlice = createSlice({
@@ -82,6 +75,9 @@ const userSlice = createSlice({
     bulder.addCase(fetchLogin.fulfilled, (state, action) => {
       state.currentUser = action.payload;
       state.isAuth = true;
+    });
+    bulder.addCase(fetchLogin.rejected, (state) => {
+      state.isAuth = false;
     });
     bulder.addCase(fetchGetUser.pending, () => {});
     bulder.addCase(fetchGetUser.fulfilled, (state, action) => {

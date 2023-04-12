@@ -29,53 +29,38 @@ export default class AuthService {
   }
 
   static async login(email: string, password: string) {
-    try {
-      const user = JSON.stringify({
-        email,
-        password,
-      });
-      const res = await fetch(URLs.SEVER + URLs.LOGIN, {
-        method: 'POST',
-        mode: 'cors',
+    const res = await axios.post(
+      URLs.SEVER + URLs.LOGIN,
+      { email, password },
+      {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: user,
-      });
+      },
+    );
 
-      if (!res.ok) {
-        throw new Error(res.statusText);
-      }
-      const data = await res.json();
-      localStorage.setItem('token', data['token']);
-      return data.user;
-    } catch (error) {
-      alert(error);
-      localStorage.removeItem('token');
-      throw error;
+    if (!res.status) {
+      throw (res.statusText, res.data);
     }
+    localStorage.setItem('token', res.data.token);
+    const data = res.data.user;
+    return data;
   }
 
   static async getUser() {
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(URLs.SEVER + URLs.AUTH, {
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer ' + token,
-        },
-      });
+    const token = localStorage.getItem('token');
 
-      if (!res.ok) {
-        throw res.statusText;
-      }
+    const res = await axios.get(URLs.SEVER + URLs.AUTH, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-      const data = await res.json();
-      return data;
-    } catch (error) {
-      alert(error);
-      throw error;
+    if (!res.status) {
+      throw (res.statusText, res.data);
     }
+
+    const data = res.data;
+    return data;
   }
 }

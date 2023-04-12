@@ -16,31 +16,30 @@ import (
 
 const (
 	salt       = "sadfsdafa32434212"
-	signingKey = "jkjdskfjaks3839#83kas"
+	signingKey = "qrkjk#4#%35FSFJlja#4353KSFjH"
 	tokenTTL   = 1 * time.Hour
 )
 
 type tokenClaims struct {
-	UserID string `jsong:"user_id"`
+	UserID string `json:"user_id"`
 	jwt.RegisteredClaims
 }
 
 func ParseToken(accessToken string) (string, error) {
-	token, err := jwt.ParseWithClaims(accessToken, &tokenClaims{}, func(t *jwt.Token) (interface{}, error) {
-		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("invalid signing method")
-		}
+	claims := &tokenClaims{}
+	token, err := jwt.ParseWithClaims(accessToken, claims, func(t *jwt.Token) (interface{}, error) {
 		return []byte(signingKey), nil
 	})
 	if err != nil {
+		log.Println(err)
 		return "", err
 	}
 
-	claims, ok := token.Claims.(*tokenClaims)
-	if !ok {
-		return "", errors.New("token claims are not  of type *tokenClaims")
+	if !token.Valid {
+		log.Println(err)
+		return "", err
 	}
-
+	fmt.Println(claims.UserID, "userID")
 	return claims.UserID, nil
 }
 
@@ -51,10 +50,9 @@ func generatePasswordHash(password string) string {
 	return fmt.Sprintf("%x", hash.Sum([]byte(salt)))
 }
 
-func (s *Service) GenerateToken(id string) (string, error) {
-
+func (s *Service) GenerateToken(userID string) (string, error) {
 	claims := &tokenClaims{
-		UserID: id,
+		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(tokenTTL)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -72,7 +70,7 @@ func (s *Service) GenerateToken(id string) (string, error) {
 // }
 
 func (s *Service) FindOne(ctx context.Context, id string) (models.User, error) {
-
+	fmt.Println("service findONe", id)
 	return s.storage.FindOne(ctx, id)
 }
 
@@ -115,4 +113,8 @@ func (s *Service) Create(ctx context.Context, user *models.User) (string, error)
 		return "", err
 	}
 	return "", err
+}
+
+func (s *Service) Update(ctx context.Context, user *models.User) error {
+	return s.storage.Update(ctx, user)
 }

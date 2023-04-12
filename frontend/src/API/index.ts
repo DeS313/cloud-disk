@@ -3,4 +3,5 @@ export enum URLs {
   REGISTRATION = '/registration',
   LOGIN = '/login',
   AUTH = '/user',
+  FILES = '/files',
 }

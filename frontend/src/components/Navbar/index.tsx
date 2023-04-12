@@ -5,13 +5,14 @@ import Logo from '../../assets/img/navbar-logo.svg'
 import { NavLink } from 'react-router-dom'
 import { RouteTo } from '../../route'
 import { useSelector } from 'react-redux'
-import { selectIsAuth } from '../../store/slices/user/selectors'
+import { selectIsAuth, selectUser } from '../../store/slices/user/selectors'
 import { useAppDispatch } from '../../store'
 import { logout } from '../../store/slices/user/userSlice'
 import { useDispatch } from 'react-redux'
 
 const Navbar: React.FC = () => {
     const isAuth = useSelector(selectIsAuth)
+    const user = useSelector(selectUser)
     const dispatch = useDispatch()
     return (
         <div className={s.navbar}>
@@ -29,11 +30,14 @@ const Navbar: React.FC = () => {
                             </div>
                         </>
                         :
-                        <div
-                            onClick={() => dispatch(logout())}
-                            className={s.logout}>
-                            Выход
-                        </div>
+                        <>
+                            <div>{user && user.Email}</div>
+                            <div
+                                onClick={() => dispatch(logout())}
+                                className={s.logout}>
+                                Выход
+                            </div>
+                        </>
                 }
 
             </div>

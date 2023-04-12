@@ -1,0 +1,24 @@
+@import '../../sass/variables';
+
+.disk {
+    margin-top: 20px;
+
+    .btns {
+        display: flex;
+    }
+
+    .create {
+        margin-left: 20px;
+    }
+
+    .input {
+        display: none;
+    }
+
+    .label {
+        border: 2px dashed $font-color;
+        padding: 5px 10px;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+}

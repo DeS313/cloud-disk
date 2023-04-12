@@ -65,3 +65,25 @@ func (s *Storage) Create(ctx context.Context, user models.User) (string, error) 
 
 	return oid.Hex(), nil
 }
+
+func (s *Storage) Update(ctx context.Context, user *models.User) error {
+	fmt.Println("user", user)
+	filter := bson.M{"_id": user.ID}
+
+	update := bson.M{
+		"$set": bson.M{
+			"userSpace": user.UserSpace,
+		},
+	}
+
+	result, err := s.db.Collection(users).UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	if result.MatchedCount == 0 {
+		return fmt.Errorf("ERR: result matched count")
+	}
+
+	return nil
+}

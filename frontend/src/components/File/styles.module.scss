@@ -1,0 +1,30 @@
+@import "../../sass/variables";
+
+.file {
+    margin: 10px 10px;
+    border-bottom: $font-color solid 2px;
+    display: grid;
+    grid-template-columns: 1fr 4fr repeat(4, 1fr);
+    align-items: center;
+
+    &:hover {
+        transform: scale(1.02);
+    }
+
+    .img {
+        display: grid;
+        justify-self: start;
+    }
+
+    .date {
+        display: grid;
+        grid-column-start: 5;
+        justify-content: center;
+    }
+
+    .size {
+        display: grid;
+        grid-column-start: 6;
+        justify-content: center;
+    }
+}
